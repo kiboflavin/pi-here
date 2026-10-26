@@ -15,6 +15,8 @@ iconutil -c icns "$WORK/i.iconset" -o "$WORK/icon.icns"
 
 rm -rf "$APP"
 osacompile -o "$APP" pi-here.applescript
+cp pi-here.sh "$APP/Contents/Resources/pi-here.sh"
+chmod +x "$APP/Contents/Resources/pi-here.sh"
 cp "$WORK/icon.icns" "$APP/Contents/Resources/PiHere.icns"
 rm -f "$APP/Contents/Resources/droplet.icns"
 /usr/libexec/PlistBuddy -c "Set :CFBundleIconFile PiHere" "$APP/Contents/Info.plist"

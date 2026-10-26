@@ -1,36 +1,23 @@
--- Click (Finder toolbar) -> Ghostty+pi in the front Finder folder.
--- Drop a folder or file -> Ghostty+pi there / in its parent folder.
--- Diagnose: tail -f ~/Library/Logs/pi-here.log
+-- Finder front end for pi-here.sh: click (toolbar) or drop (folder/file).
+-- All launching, checking and logging lives in the shell script.
 
 on run
-	try
-		set f to my frontFolder()
-		my logLine("click -> folder [" & f & "]")
-		my launchPi(f)
-	on error errMsg number errNum
-		my logLine("click FAILED " & errNum & ": " & errMsg)
-		error errMsg number errNum
-	end try
+	set r to my finderFolder()
+	my launchPi((item 1 of r), "click | " & (item 2 of r))
 end run
 
 on open theItems
 	repeat with f in theItems
-		try
-			set p to POSIX path of (f as alias)
-			if p ends with "/" then
-				set dirPath to text 1 thru -2 of p
-			else
-				set dirPath to do shell script "dirname " & quoted form of p
-			end if
-			my logLine("drop [" & p & "] -> folder [" & dirPath & "]")
-			my launchPi(dirPath)
-		on error errMsg number errNum
-			my logLine("drop FAILED " & errNum & ": " & errMsg)
-		end try
+		set p to POSIX path of (f as alias)
+		if p ends with "/" then
+			my launchPi(text 1 thru -2 of p, "drop")
+		else
+			my launchPi(do shell script "dirname " & quoted form of p, "drop")
+		end if
 	end repeat
 end open
 
-on frontFolder()
+on finderFolder()
 	set n to 0
 	set winName to "-"
 	set targetPath to "-"
@@ -49,22 +36,18 @@ on frontFolder()
 			set insertPath to POSIX path of (insertion location as alias)
 		end try
 	end tell
-	my logLine("finder: windows=" & n & " front=" & winName & " target=" & targetPath & " insertion=" & insertPath)
-	if targetPath is not "-" then return targetPath
-	if insertPath is not "-" then return insertPath
-	return POSIX path of (path to desktop folder)
-end frontFolder
+	set folderPath to "-"
+	if targetPath is not "-" then
+		set folderPath to targetPath
+	else if insertPath is not "-" then
+		set folderPath to insertPath
+	else
+		set folderPath to POSIX path of (path to desktop folder)
+	end if
+	return {folderPath, "finder: windows=" & n & " front=" & winName & " target=" & targetPath & " insertion=" & insertPath}
+end finderFolder
 
-on launchPi(dirPath)
-	set piPath to (POSIX path of (path to home folder)) & ".pi/agent/bin/pi"
-	set cmd to "open -na Ghostty --args --window-save-state=never --working-directory=" & quoted form of dirPath & " --initial-command=" & quoted form of ("/bin/zsh -lc 'exec " & piPath & "'")
-	my logLine("exec: " & cmd)
-	do shell script cmd
+on launchPi(dirPath, src)
+	set sh to (POSIX path of (path to me)) & "Contents/Resources/pi-here.sh"
+	do shell script quoted form of sh & " " & quoted form of dirPath & " " & quoted form of src
 end launchPi
-
-on logLine(msg)
-	try
-		set home to POSIX path of (path to home folder)
-		do shell script "test -f " & quoted form of (home & ".pi/here-debug") & " && printf '%s %s\\n' \"$(date '+%F %T')\" " & quoted form of msg & " >> " & quoted form of (home & "Library/Logs/pi-here.log") & " || true"
-	end try
-end logLine
