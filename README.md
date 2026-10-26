@@ -16,6 +16,7 @@ Two parts: `pi-here.applescript` is just the Finder front end (folder lookup + d
 - [Ghostty.app](https://ghostty.org) in `/Applications`
 - pi at `~/.pi/agent/bin/pi` (resolved from `$HOME` at runtime; override with `PI_HERE_PI=/path/to/pi`)
 - Build tools: `osacompile` (macOS), ImageMagick (`magick`) plus `sips`/`iconutil` for the icon
+- Optional: [Herdr](https://herdr.dev) + `jq`, for the in-Herdr mode below
 
 ## Build
 
@@ -45,6 +46,17 @@ PI_HERE_PI=/opt/pi/bin/pi ./pi-here.sh .
 ```
 
 The copy inside the app bundle is `~/Applications/Pi Here.app/Contents/Resources/pi-here.sh`, which is what the applet calls.
+
+## Inside Herdr
+
+When `pi-here` is run from a Herdr pane (`HERDR_ENV=1`), it opens the folder as a new **workspace in the running session** instead of a new Ghostty window:
+
+```sh
+herdr workspace create --cwd <folder> --label <basename> --focus
+herdr pane run <root pane> "exec <pi>"
+```
+
+If `herdr`/`jq` is missing or the call fails, it prints a warning and falls back to the normal Ghostty launch. Clicking the Finder toolbar icon always opens Ghostty — Herdr's CLI only controls a session from inside it.
 
 ## How it works
 

@@ -18,6 +18,17 @@ if [ -e "$HOME/.pi/here-debug" ]; then
 		>> "$HOME/Library/Logs/pi-here.log"
 fi
 
+# Inside a Herdr pane: open a workspace there instead of a new terminal window.
+if [ "${HERDR_ENV:-}" = 1 ] && command -v herdr >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+	if pane=$(herdr workspace create --cwd "$dir" --label "$(basename "$dir")" --focus \
+			| jq -r '.result.root_pane.pane_id') \
+		&& [ -n "$pane" ] && [ "$pane" != null ] \
+		&& herdr pane run "$pane" "exec '$pi'" >/dev/null; then
+		exit 0
+	fi
+	echo "pi-here: herdr launch failed, falling back to Ghostty" >&2
+fi
+
 exec open -na Ghostty --args \
 	--window-save-state=never \
 	--working-directory="$dir" \
