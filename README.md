@@ -47,16 +47,18 @@ PI_HERE_PI=/opt/pi/bin/pi ./pi-here.sh .
 
 The copy inside the app bundle is `~/Applications/Pi Here.app/Contents/Resources/pi-here.sh`, which is what the applet calls.
 
-## Inside Herdr
+## If Herdr is running
 
-When `pi-here` is run from a Herdr pane (`HERDR_ENV=1`), it opens the folder as a new **workspace in the running session** instead of a new Ghostty window:
+When the Herdr server is running (`herdr status server` → `status: running`), the folder opens as a new **workspace in that session** instead of a Ghostty window — from the Finder button and from the terminal alike:
 
 ```sh
 herdr workspace create --cwd <folder> --label <basename> --focus
 herdr pane run <root pane> "exec <pi>"
 ```
 
-If `herdr`/`jq` is missing or the call fails, it prints a warning and falls back to the normal Ghostty launch. Clicking the Finder toolbar icon always opens Ghostty — Herdr's CLI only controls a session from inside it.
+Herdr then recognises pi in the pane (sidebar shows the agent and its state). No `HERDR_ENV` needed — the CLI talks to the running server by socket. If Herdr isn't running, `herdr`/`jq` is missing, or the create/pane commands fail, it prints a warning (on failure) and opens a normal Ghostty window instead.
+
+Because Finder launches get a minimal `PATH`, the script appends `/opt/homebrew/bin` and `/usr/local/bin` so `herdr` and `jq` are found.
 
 ## How it works
 

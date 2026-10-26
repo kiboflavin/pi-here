@@ -3,6 +3,10 @@
 # The Finder applet calls this; it also works straight from a terminal.
 set -eu
 
+# GUI launches (Finder) get a minimal PATH; include the usual binary dirs.
+PATH=$PATH:/opt/homebrew/bin:/usr/local/bin
+export PATH
+
 dir=${1:-.}
 case $dir in
 	/*) ;;
@@ -18,8 +22,9 @@ if [ -e "$HOME/.pi/here-debug" ]; then
 		>> "$HOME/Library/Logs/pi-here.log"
 fi
 
-# Inside a Herdr pane: open a workspace there instead of a new terminal window.
-if [ "${HERDR_ENV:-}" = 1 ] && command -v herdr >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+# Herdr running: open the folder as a workspace there instead of a new window.
+if command -v herdr >/dev/null 2>&1 && command -v jq >/dev/null 2>&1 \
+	&& herdr status server 2>/dev/null | grep -q '^status: running'; then
 	if pane=$(herdr workspace create --cwd "$dir" --label "$(basename "$dir")" --focus \
 			| jq -r '.result.root_pane.pane_id') \
 		&& [ -n "$pane" ] && [ "$pane" != null ] \
