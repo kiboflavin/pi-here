@@ -64,7 +64,7 @@ end launchPi
 
 on logLine(msg)
 	try
-		set logPath to (POSIX path of (path to home folder)) & "Library/Logs/pi-here.log"
-		do shell script "printf '%s %s\\n' \"$(date '+%F %T')\" " & quoted form of msg & " >> " & quoted form of logPath
+		set home to POSIX path of (path to home folder)
+		do shell script "test -f " & quoted form of (home & ".pi/here-debug") & " && printf '%s %s\\n' \"$(date '+%F %T')\" " & quoted form of msg & " >> " & quoted form of (home & "Library/Logs/pi-here.log") & " || true"
 	end try
 end logLine

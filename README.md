@@ -55,13 +55,16 @@ Still a terminal, not magic: `shell`-level startup files apply, so a `cd` in `.z
 
 ## Troubleshooting
 
-Every launch is logged:
+Logging is off by default. To turn it on, create the marker file (no rebuild needed):
 
 ```sh
+touch ~/.pi/here-debug
 tail -f ~/Library/Logs/pi-here.log
 ```
 
-Each entry shows what Finder reported (`windows=… front=… target=… insertion=…`), the folder that was chosen, and the exact `open` command that ran. An empty log means the app never ran — usually a stale toolbar item (⌘-drag the app in again) or a denied Automation prompt.
+Each entry shows what Finder reported (`windows=… front=… target=… insertion=…`), the folder that was chosen, and the exact `open` command that ran. Delete `~/.pi/here-debug` to switch logging off again.
+
+No log entries at all means the app never ran — usually a stale toolbar item (⌘-drag the app in again) or a denied Automation prompt.
 
 ## Files
 
